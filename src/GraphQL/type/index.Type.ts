@@ -52,17 +52,37 @@ export default gql`
         user    : User
     }
 
+    type ReturnUserById {
+        user    : User 
+        userId  : String
+        message : String
+        status  : Int
+    }
+
+    type ReturnPostById {
+        post    : Post
+        postId  : Int
+        message : String
+        status  : Int
+    }
+
+    type ReturnCreatedPost {
+        message : String
+        status  : Int
+        post    : Post
+    }
+
     type Query {
-        getUserById(id : Int!):User
+        getUserById(id : Int!):ReturnUserById
         getUsers():[User]
         getPosts():[Post]
-        getPostById(id : Int!):Post
+        getPostById(id : Int!):ReturnPostById
     }
 
 
     type Mutation {
         createUser(userName : String! , password : String!):User
-        createPost(title : String! , content : String! , userId : int!):Post
+        createPost(title : String! , content : String! , userId : int!):ReturnCreatedPost
         createComment(comment : String! , userId : Int! , postId : Int!):Comment
         deletePost(postId : Int! , userId : Int!):Delete
         deleteComment(commentId : Int! , userId : Int!):Delete
