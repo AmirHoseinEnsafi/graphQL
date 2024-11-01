@@ -72,6 +72,46 @@ export default gql`
         post    : Post
     }
 
+    input CreateUserInput {
+        userName : String!
+        password : String!
+    }
+
+    input CreatePostInput {
+        title : String! 
+        content : String! 
+        userId : String!
+    }
+
+    input CreateCommentInput {
+        comment : String! 
+        userId : String! 
+        postId : Int!
+    }
+
+    input DeletePostInput {
+        postId : Int! 
+        userId : String!
+    }
+
+    input DeleteCommentInput {
+        commentId : Int! 
+        userId : Int!
+    }
+
+    input UpdatePostInput {
+        postId : String! 
+        userId : Int! 
+        title : String! 
+        content : String!
+    }
+
+    input UpdateCommentInput {
+        commentId : Int! 
+        comment : String! 
+        userId : Int!
+    }
+
     type Query {
         getUserById(id : Int!):ReturnUserById
         getUsers():[User]
@@ -81,12 +121,12 @@ export default gql`
 
 
     type Mutation {
-        createUser(userName : String! , password : String!):User
-        createPost(title : String! , content : String! , userId : int!):ReturnCreatedPost
-        createComment(comment : String! , userId : Int! , postId : Int!):Comment
-        deletePost(postId : Int! , userId : Int!):Delete
-        deleteComment(commentId : Int! , userId : Int!):Delete
-        updatePost(postId : String! , userId : Int! , title : String! , content : String!):UpdatePost
-        updateComment(commentId : Int! , comment : String! , userId : Int!):UpdateComment
+        createUser(input : CreateUserInput):User
+        createPost(input : CreatePostInput):ReturnCreatedPost
+        createComment(input : CreateCommentInput):Comment
+        deletePost(input : DeletePostInput):Delete
+        deleteComment(input : DeleteCommentInput):Delete
+        updatePost(input : UpdatePostInput):UpdatePost
+        updateComment(input : UpdateCommentInput):UpdateComment
     }
 `

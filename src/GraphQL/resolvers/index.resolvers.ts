@@ -1,4 +1,6 @@
 import prisma from "../../utils/prisma" 
+import { CreateUserArgs , CreatePostArgs , CreateCommentInput , DeletePostInput , DeleteCommentInput , UpdatePostInput , UpdateCommentInput} from '../../ts-type/resolvers-types'
+
 
 const resolvers = {
     Query : {
@@ -66,16 +68,16 @@ const resolvers = {
 
     Mutation : {
 
-        async createUser(_ : any , obj : {userName : string , password : string}){
+        async createUser(_ : any , args : CreateUserArgs){
             try{
-            let user = await prisma.user.count({where : {userName : obj.userName}})
+            let user = await prisma.user.count({where : {userName : args.input.userName}})
                 if(user > 0){
                     return {
                         message : "username already exist please choice the unique userName",
                         status : 400 
                     }
                 }else {
-                    let createUser = await prisma.user.create({data : {userName : obj.userName , password : obj.password}})
+                    let createUser = await prisma.user.create({data : {userName : args.input.userName , password : args.input.password}})
                     return {
                         userId : createUser.id,
                         message : 'the user created sucssesfully',
@@ -89,11 +91,11 @@ const resolvers = {
             }
         },
 
-        async createPost( _ : any , obj : {title : string , content : string , userId : string}) {
+        async createPost( _ : any , args : CreatePostArgs ) {
             try{
                 let resultobject : any = {}
-                if(obj.content && obj.title && obj.userId){
-                    let post =  await prisma.post.create({data : {title : obj.title , content : obj.content , userId : obj.userId}})
+                if(args.input.content && args.input.title && args.input.userId){
+                    let post =  await prisma.post.create({data : {title : args.input.title , content : args.input.content , userId : args.input.userId}})
                     resultobject.post = post
                     resultobject.message = "post created sucssesfully"
                     resultobject.status = 201
@@ -110,9 +112,13 @@ const resolvers = {
             }
         },
         
-        async createComment(_ : any , obj : {comment : string , userId : string , postId : number}) {
+        async createComment(_ : any , args : CreateCommentInput) {
             try{
-                return await prisma.comment.create({data : {content : obj.comment , userId : obj.userId , postId : obj.postId}})
+                return await prisma.comment.create({
+                    data : {
+                        content : args.input.comment , 
+                        userId : args.input.userId , 
+                        postId : args.input.postId}})
             } catch (err) {
                 if(err instanceof Error){
                     console.log(`this error is from method createComment ${err.message}`)
@@ -121,16 +127,16 @@ const resolvers = {
             }
         },
 
-        async deletePost(_ : any , obj : {postId : number , userId : string}) {
+        async deletePost(_ : any , args : DeletePostInput) {
             try{
-                let post = await prisma.post.findFirst({where : {id : obj.postId}})
-                if(post?.userId !== obj.userId){
+                let post = await prisma.post.findFirst({where : {id : args.input.postId}})
+                if(post?.userId !== args.input.userId){
                     return {
                         message : "you can't delete the someone else message",
                         status : 400
                     }
                 }else {
-                    let deletedPost = await prisma.post.delete({where : {id : obj.postId}})
+                    let deletedPost = await prisma.post.delete({where : {id : args.input.postId}})
                     if(deletedPost){
                         return {
                             message : "true",
@@ -151,16 +157,16 @@ const resolvers = {
             }
         },
 
-        async deleteComment(_ : any , obj : {commentId : number , userId : String}){
+        async deleteComment(_ : any , args : DeleteCommentInput){
             try{
-                let comment = await prisma.comment.findFirst({where : {id : obj.commentId}})
-                if(comment?.userId !== obj.userId){
+                let comment = await prisma.comment.findFirst({where : {id : args.input.commentId}})
+                if(comment?.userId !== args.input.userId){
                     return {
                         message : "you can't delete the someone else message",
                         status : 400
                     }
                 }else{
-                    let deletedComment = await prisma.comment.delete({where : {id : obj.commentId}})
+                    let deletedComment = await prisma.comment.delete({where : {id : args.input.commentId}})
                     if(deletedComment){
                         return {
                             message : "true" ,
@@ -181,35 +187,37 @@ const resolvers = {
             }
         },
 
-        async updatePost(_ : any , obj : {postId : number , userId : string , title : string , content : string}){
+        async updatePost(_ : any , args : UpdatePostInput){
             try{
-                let post = await prisma.post.findFirst({where : {id : obj.postId}})
-                if(post?.userId !== obj.userId){
+                let post = await prisma.post.findFirst({where : {id : args.input.postId}})
+                if(post?.userId !== args.input.userId){
                     return {
                         message : "you can't update the someone else post",
                         status : 400
                     }
                 }else {
-                    let updatedPost = await prisma.post.update({
-                        where : {
-                            id : obj.postId
-                        }, 
-                        data : {
-                            title : obj.title ?? post.title , 
-                            content : obj.content ?? post.content
-                        }
-                    })
-
-                    if(updatedPost){
-                        return {
-                            message : "true" ,
-                            status : 200 ,
-                            postId : updatedPost.id
-                        }
-                    }else {
-                        return {
-                            message : "false" ,
-                            status : 500 
+                    if(args.input.title && args.input.content){
+                        let updatedPost = await prisma.post.update({
+                            where : {
+                                id : args.input.postId
+                            }, 
+                            data : {
+                                title : args.input.title ?? post.title , 
+                                content : args.input.content ?? post.content
+                            }
+                        })
+    
+                        if(updatedPost){
+                            return {
+                                message : "true" ,
+                                status : 200 ,
+                                postId : updatedPost.id
+                            }
+                        }else {
+                            return {
+                                message : "false" ,
+                                status : 500 
+                            }
                         }
                     }
                 }
@@ -221,10 +229,10 @@ const resolvers = {
             }
         },
 
-        async updateComment (_ : any , obj : {commentId : number , comment : string , userId : string}) {
+        async updateComment (_ : any , args : UpdateCommentInput) {
             try{
-                let comment = await prisma.comment.findFirst({where : {id : obj.commentId}})
-                if(comment?.userId !== obj.userId){
+                let comment = await prisma.comment.findFirst({where : {id : args.input.commentId}})
+                if(comment?.userId !== args.input.userId){
                     return {
                         message : "you can't update someone else comment" ,
                         status : 400
@@ -232,10 +240,10 @@ const resolvers = {
                 }else {
                     let updatedComment = await prisma.comment.update({
                         where : {
-                            id : obj.commentId
+                            id : args.input.commentId
                         },
                         data : {
-                            content : obj.comment
+                            content : args.input.comment
                         }
                     })
 
