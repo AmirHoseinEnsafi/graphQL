@@ -7,19 +7,34 @@ const resolvers = {
 
         async getUserById (_ : any , obj : {id : string}) {
             try{
+
                 let returnObject : any = {} ;
-                let user =  await prisma.user.count({where : {id : obj.id}})
+
+                let user =  await prisma.user.count({
+                    where : {
+                        id : obj.id
+                    }
+                })
+
                 if(user > 0){
+
                     returnObject.userId =  obj.id
+
                 }else{
+
                     returnObject.message = 'the user with given id is not the fiend please make sure sending right id'
                     returnObject.status = 400
+
                 }
+                
                 return returnObject
+
             }catch(err){
+
                 if(err instanceof Error){
                     console.log(`this error is from method getUserById ${err.message}`)
                 }
+                
                 return
             }
         },
@@ -48,8 +63,15 @@ const resolvers = {
 
         async getPostById(_ : any , obj : {id : number}){
             try{
+
                 let returningObject : any = {}
-                let resultCount = await prisma.post.count({where : {id : obj.id}})
+
+                let resultCount = await prisma.post.count({
+                    where : {
+                        id : obj.id
+                    }
+                })
+
                 if(resultCount > 0){
                     returningObject.postId = obj.id
                 }else {
@@ -70,7 +92,9 @@ const resolvers = {
 
         async createUser(_ : any , args : CreateUserArgs){
             try{
+
             const {userName , password} = args.input
+
             let user = await prisma.user.count({
                 where : {
                     userName : userName
@@ -103,8 +127,11 @@ const resolvers = {
 
         async createPost( _ : any , args : CreatePostArgs ) {
             try{
+                
                 const {content , userId , title} = args.input
+
                 let resultobject : any = {}
+
                 if(content && title && userId){
                     let post =  await prisma.post.create({
                         data : {
@@ -117,11 +144,16 @@ const resolvers = {
                     resultobject.post = post
                     resultobject.message = "post created sucssesfully"
                     resultobject.status = 201
+                    
                 }else{
+
                     resultobject.message = "one of the field was not send"
                     resultobject.status = 400
+
                 }
+
                 return resultobject
+
             } catch (err) {
                 if(err instanceof Error){
                     console.log(`this error is from method createPost ${err.message}`)
@@ -153,6 +185,7 @@ const resolvers = {
 
         async deletePost(_ : any , args : DeletePostInput) {
             try{
+
                 const {postId , userId} = args.input
 
                 let post = await prisma.post.findFirst({
@@ -167,7 +200,12 @@ const resolvers = {
                         status : 400
                     }
                 }else {
-                    let deletedPost = await prisma.post.delete({where : {id : postId}})
+                    let deletedPost = await prisma.post.delete({
+                        where : {
+                            id : postId
+                        }
+                    })
+
                     if(deletedPost){
                         return {
                             message : "true",
@@ -203,7 +241,12 @@ const resolvers = {
                         status : 400
                     }
                 }else{
-                    let deletedComment = await prisma.comment.delete({where : {id : commentId}})
+                    let deletedComment = await prisma.comment.delete({
+                        where : {
+                            id : commentId
+                        }
+                    })
+                    
                     if(deletedComment){
                         return {
                             message : "true" ,
@@ -323,7 +366,12 @@ const resolvers = {
     User : {
         posts : async (parent : {id : string}) => {
             try {
-                return await prisma.post.findMany({where : {userId : parent.id}})
+                return await prisma.post.findMany({
+                    where : {
+                        userId : parent.id
+                    }
+                })
+
             } catch (err) {
                 if(err instanceof Error){
                     console.log(`this error is from method User / posts ${err.message}`)
@@ -336,7 +384,12 @@ const resolvers = {
     Post : {
         user : async (parent : {userId : string}) => {
             try{
-                return await prisma.user.findFirst({where : {id : parent.userId}})
+                return await prisma.user.findFirst({
+                    where : {
+                        id : parent.userId
+                    }
+                })
+
             } catch (err) {
                 if(err instanceof Error){
                     console.log(`this error is from method Post / user ${err.message}`)
@@ -346,7 +399,11 @@ const resolvers = {
         } ,
         comments : async (parent : {id : number}) => {
             try{
-                return await prisma.comment.findMany({where : {postId : parent.id}})
+                return await prisma.comment.findMany({
+                    where : {
+                        postId : parent.id
+                    }
+                })
             } catch (err) {
                 if(err instanceof Error){
                     console.log(`this error is from method Post / comments  ${err.message}`)
@@ -359,7 +416,12 @@ const resolvers = {
     Comment : {
         post : async (parent : {postId : number}) => {
             try{
-                return await prisma.post.findFirst({where : {id : parent.postId}})
+                return await prisma.post.findFirst({
+                    where : {
+                        id : parent.postId
+                    }
+                })
+
             } catch (err) {
                 if(err instanceof Error){
                     console.log(`this error is from method Comment / post ${err.message}`)
@@ -369,7 +431,12 @@ const resolvers = {
         },
         user : async (parent : {userId : string}) => {
             try{
-                return await prisma.user.findFirst({where : {id : parent.userId}})
+                return await prisma.user.findFirst({
+                    where : {
+                        id : parent.userId
+                    }
+                })
+
             } catch (err) {
                 if(err instanceof Error){
                     console.log(`this error is from method Comment / user ${err.message}`)
@@ -382,7 +449,12 @@ const resolvers = {
     UpdatePost : {
         post : async (parent : {postId : number}) => {
             try{
-                return await prisma.post.findFirst({where : {id : parent.postId}})
+                return await prisma.post.findFirst({
+                    where : {
+                        id : parent.postId
+                    }
+                })
+
             } catch (err) {
                 if(err instanceof Error){
                     console.log(`this error is from method UpdatePost / post ${err.message}`)
@@ -395,7 +467,12 @@ const resolvers = {
     UpdateComment : {
         post : async (parent  : {postId : number}) => {
             try{
-                return await prisma.post.findFirst({where : {id : parent.postId}})
+                return await prisma.post.findFirst({
+                    where : {
+                        id : parent.postId
+                    }
+                })
+
             } catch (err) {
                 if(err instanceof Error){
                     console.log(`this error is from method UpdateComment / post ${err.message}`)
@@ -405,7 +482,12 @@ const resolvers = {
         },
         comment : async (parent : {commentId : number}) => {
             try{
-                return await prisma.comment.findFirst({where : {id : parent.commentId}})
+                return await prisma.comment.findFirst({
+                    where : {
+                        id : parent.commentId
+                    }
+                })
+
             } catch (err) {
                 if(err instanceof Error){
                     console.log(`this error is from method UpdateComment / comment ${err.message}`)
@@ -418,7 +500,12 @@ const resolvers = {
     CreateUser : {
         user : async (parent : {userId : string}) => {
             try{
-                return await prisma.user.findFirst({where : {id : parent.userId}})
+                return await prisma.user.findFirst({
+                    where : {
+                        id : parent.userId
+                    }
+                })
+
             } catch (err) {
                 if(err instanceof Error){
                     console.log(`this error is from method CreateUser / user ${err.message}`)
@@ -432,7 +519,12 @@ const resolvers = {
         user : async (parent : {userId : string}) => {
             try{
                 if(parent.userId){
-                    return await prisma.user.findFirst({where : {id : parent.userId}})
+                    return await prisma.user.findFirst({
+                        where : {
+                            id : parent.userId
+                        }
+                    })
+
                 }else{
                     return
                 }
@@ -449,7 +541,12 @@ const resolvers = {
         post : async (parent : {postId : number}) => {
             try{
                 if(parent.postId){
-                    return await prisma.post.findFirst({where : {id : parent.postId}})
+                    return await prisma.post.findFirst({
+                        where : {
+                            id : parent.postId
+                        }
+                    })
+
                 }else{
                     return
                 }
